@@ -1,0 +1,20 @@
+import Card from "@/componnets/card";
+import { APIRequests } from "@/store/api"
+
+
+export default async function Trendings() {
+    const trendings  = await APIRequests.trending()
+    console.log( await trendings);
+  return (
+    <>
+    <p className="text-7xl font-bold mt-30  text-center text-blue-500 ">Trending Movies</p>
+   <div className="flex flex-wrap gap-10 justify-center">
+        {
+            trendings.results.map((movie)=>{
+                return <Card key={movie.id} {...movie} />
+            })
+        }
+    </div>
+        </>
+  )
+}
