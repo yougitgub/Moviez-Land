@@ -49,15 +49,8 @@ export default function Signup() {
       const status = res.status;
       if (status >= 200 && status < 300) {
         toast.success("Account created successfully!");
-        setUser({
-          name: data.name,
-          email: data.email,
-          favorites: data.favorites,
-          id: data.id,
-          profileImg: data.profileImg,
-        })
-        setIsLoggedIn(true);
-        router.push('/search');
+
+        router.push('/login');
       } else {
         setGeneralError(data?.error || 'Signup failed');
         if (status === 408 || status === 504) {
@@ -99,7 +92,7 @@ export default function Signup() {
           <label className="block">
             <span className="text-sm text-gray-300">Email</span>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={e => setEmail(e.target.value)}
               className={`mt-1 block w-full px-3 py-2 rounded bg-gray-900 border ${errors.email ? 'border-red-500' : 'border-gray-700'} focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors`}

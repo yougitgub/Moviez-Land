@@ -62,7 +62,7 @@ function Profile() {
             if (response.status >= 200 && response.status < 300) {
                 if (response.passwordUpdated) {
                     toast.success("Password updated! Please login again.");
-                    await signOut({ redirect: false });
+                    await signOut({ redirect: true });
                     router.push('/login');
                 } else {
                     toast.success("Profile Updated Successfully");

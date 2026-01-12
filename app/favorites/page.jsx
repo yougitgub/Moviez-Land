@@ -42,11 +42,15 @@ export default function FavoritesMovies() {
         <section className="w-[90%] mt-[5%] mx-auto">
           <p className="text-6xl mt-5 sm:mt-0 text-center text-blue-600 font-bold">Your Favorites </p>
           <div className="flex flex-wrap gap-20">
-            {movies.map((movie, index) => (
-              <div key={movie.id}>
-                <Card {...movie} />
-              </div>
-            ))}
+            {movies.length === 0 ? (
+              <p className="text-2xl text-center w-full mt-30 text-blue-600 font-bold">You don't have any favorite movies</p>
+            ) : (
+              movies.map((movie, index) => (
+                <div key={movie.id}>
+                  <Card {...movie} />
+                </div>
+              ))
+            )}
           </div>
         </section>
       )}

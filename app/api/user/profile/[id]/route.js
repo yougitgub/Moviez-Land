@@ -91,7 +91,7 @@ export async function PUT(request, { params }) {
 
         return NextResponse.json({
             message: updateData.password ? 'Password updated, please login again' : 'Profile updated',
-            passwordUpdated: !!updateData.password,
+            passwordUpdated: updateData.password ? true : false,
             id: user._id,
             email: user.email,
             name: user.name,
