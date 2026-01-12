@@ -1,27 +1,37 @@
 import { NextResponse } from "next/server";
-import {dbConnect} from "@/lib/mongodb";
+import { dbConnect } from "@/lib/mongodb";
 import User from "@/models/User";
+import { passwordHashing } from "@/utils/bcrypt";
+import { signupSchema } from "@/utils/schemas";
 
 export async function POST(req) {
     const data = await req.json();
-    const { name, email, password } = await data;
-    try{
+    const { name, email, password } = data;
+
+    const validation = signupSchema.safeParse({ name, email, password });
+    if (!validation.success) {
+        const firstError = validation.error?.errors?.[0]?.message || "Invalid input";
+        return NextResponse.json({ error: firstError }, { status: 400 });
+    }
+
+    try {
         await dbConnect();
-        const user = new User({ name: name, email:email, password:password });
-        const existingName = await User.find({name:user.name});
-        if(existingName.length !== 0){
+        const hashedPassword = await passwordHashing(password);
+        const defaultImg = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        const user = new User({ name, email, password: hashedPassword, profileImg: defaultImg });
+
+        const existingName = await User.findOne({ name });
+        if (existingName) {
             return NextResponse.json({ error: 'Name already exists ' }, { status: 400 });
         }
-        const existingEmail = await User.find({email:user.email});
-        if(existingEmail.length !== 0){
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
             return NextResponse.json({ error: 'Email already exists ' }, { status: 400 });
         }
         await user.save();
-        return NextResponse.json({ message: 'User created', id: user._id, email: user.email, name:user.name, favorites:user.favorites }, { status: 201 });
-    }catch(err){
+        return NextResponse.json({ message: 'User created', id: user._id, email: user.email, name: user.name, favorites: user.favorites, profileImg: user.profileImg }, { status: 201 });
+    } catch (err) {
         console.error('auth signup error', err);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }
-    
-
 }

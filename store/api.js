@@ -1,77 +1,102 @@
 
-export const APIRequests = {
-    movies:async ()=>{
-    const data = await fetch(`${process.env.TMDB_BASE_URL}/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`,{
-    method:"GET",
-    headers:{
-      accept: 'application/json',
-      Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
+const fetchWithTimeout = async (url, options = {}, timeout = 15000) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
 
-    },
-  })
-  return await data.json()
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = {};
+    }
+    return { ...data, status: response.status };
 
-},
- movie:async (id)=>{
-    const data = await fetch(`${process.env.TMDB_BASE_URL}/movie/${id}?language=en-US`,{
-    method:"GET",
-    headers:{
-      accept: 'application/json',
-      Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
-    },
-  })
-    const trailer = await fetch(`${process.env.TMDB_BASE_URL}/movie/${id}/videos`,{
-    method:"GET",
-    headers:{
-      accept: 'application/json',
-      Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
-    },
-  })
-
-  let key = await trailer.json();
-  key = key.results[0].key;
-  console.log(key);
-  console.log('Trailer : '+ {trailer});
-  const trailerPath = `https://www.youtube.com/embed/${key}?controls=0`;
-  return  [await data.json() , trailerPath];
-
-},
- search:async (query)=>{
-    const data = await fetch(`${process.env.TMDB_BASE_URL}/search/movie?query=${query}&include_adult=false&language=en-US&page=1`,{
-    method:"GET",
-    headers:{
-      accept: 'application/json',
-      Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
-    },
-  })
-  return await data.json()
-  
-},
- trending:async ()=>{
-    const data = await fetch(`${process.env.TMDB_BASE_URL}/trending/movie/day?language=en-US`,{
-    method:"GET",
-    headers:{
-      accept: 'application/json',
-      Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
-    },
-  })
-  return await data.json()
-
-},
- getFavorites:async (userId)=>{
-  const data = await fetch(`/api/user/favorites/${userId}`, {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-    return await data.json();
-},
+  } catch (error) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      return { status: 408, error: "Request took too long. Please check your internet connection." };
+    }
+    return { status: 0, error: "Network error occurred. Please check your connection." };
+  }
 }
 
- 
-  
+export const APIRequests = {
+  movies: async (pageNumber = 1) => {
+    return await fetchWithTimeout(`${process.env.TMDB_BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=${pageNumber}&sort_by=popularity.desc`, {
+      method: "GET",
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
+
+      },
+    })
+  },
+  movie: async (id) => {
+    const data = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/movie/${id}?language=en-US`, {
+      method: "GET",
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_API_ACCESS_TOKEN}`
+
+      },
+    })
+    const trailer = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/movie/${id}/videos`, {
+      method: "GET",
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_API_ACCESS_TOKEN}`
+
+      },
+    })
+    const trailerKey = trailer?.results && trailer?.results?.length > 0 ? trailer?.results[0].key : 'no-key';
+    const trailerPath = trailerKey !== 'no-key' ? `https://www.youtube.com/embed/${trailerKey}?controls=0` : null;
+    return [data, trailerPath];
+
+  },
+  search: async (query, pageNumber = 1) => {
+    return await fetchWithTimeout(`${process.env.TMDB_BASE_URL}/search/movie?query=${query}&include_adult=false&language=en-US&page=${pageNumber}`, {
+      method: "GET",
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
+
+      },
+    })
+  },
+  trending: async (pageNumber = 1) => {
+    return await fetchWithTimeout(`${process.env.TMDB_BASE_URL}/trending/movie/day?language=en-US&page=${pageNumber}`, {
+      method: "GET",
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
+
+      },
+    })
+  },
+  getFavorites: async (userId) => {
+    return await fetchWithTimeout(`/api/user/favorites/${userId}`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+  },
+  UpdateProfile: async (userId, data) => {
+
+    return await fetchWithTimeout(`/api/user/profile/${userId}`, {
+      method: "PUT",
+      body: data,
+      headers: {
+      }
+    }, 60000)
+  },
+
+}
+
+

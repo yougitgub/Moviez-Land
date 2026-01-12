@@ -8,7 +8,12 @@ const nextConfig = {
             {
                 hostname: 'image.tmdb.org',
             },
-
+            {
+                hostname: 'cdn-icons-png.flaticon.com',
+            },
+            {
+                hostname: 'res.cloudinary.com',
+            }
         ]
     }
 };

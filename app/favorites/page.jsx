@@ -1,57 +1,55 @@
 "use client";
-import { APIRequests } from "@/store/api";
-import Card from "@/componnets/card";
-import Link from "next/link";
+import { FaHeart } from "react-icons/fa";
 import { useProvider } from "@/store/Provider";
+import { APIRequests } from "@/store/api";
+import Link from "next/link";
+import Card from "@/componnets/card";
 import { useEffect, useState } from "react";
-export default  function Favorites(){
-  const {user, isLoggedIn} = useProvider();
-  const [favorites,setFavorites] = useState([])
-  const [movies, setMovie] = useState([]);
-  console.log(isLoggedIn);
-  if(!isLoggedIn){
-    return(
-      <p className="text-3xl text-center mt-100 font-bold text-blue-500">Yor Should <Link href="/login" className="text-blue-600 hover:text-blue-400">Login</Link> to See Favorites.</p>
-    )
-  }
-  useEffect(()=>{
-  try{
-    if(user.favorites.length > 0){
-      console.log("There is a Favorite ");
-      user.favorites.forEach( (id) => {
-        console.log("Fetching Movie");
-       (async ()=>{
-          var movie = await APIRequests.movie(id) ;
-          movie = movie[0]
-          console.log(movie);
-          console.log("Adding Fetched Movie");
-          setMovie(prevMovies => [...prevMovies, movie])
-        })()
-      });
-    }else{
-      console.log("Length is Zero.");
+export default function FavoritesMovies() {
+  const { user } = useProvider();
+  const [movies, setMovies] = useState([]);
+
+
+
+
+  useEffect(() => {
+    if (!user || !user.favorites || user.favorites.length === 0) {
+      setMovies([]);
+      return;
     }
-      
-    } catch(err){
-      console.log('Error Fetching Favorites Movies');
-    }
-  },[])
-  
- console.log(user.favorites);
- console.log(movies);
-  return(
-  <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 ">
-    <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="flex flex-wrap gap-10 justify-center">
-          {movies?.length > 0 ? map((movie)=> ( 
-          <Card key={movie.id} {...movie} />
-          )): 
-          <>
-            <p className="text-white">You Don't Have Any Favorites.</p>
-          </>
-          }
+
+    const fetchFavorites = async () => {
+      try {
+        const promises = user.favorites.map(id => APIRequests.movie(id));
+        const results = await Promise.all(promises);
+        setMovies(results.map(item => item[0]));
+      } catch (err) {
+        console.error("Error fetching favorite movies:", err);
+      }
+    };
+
+    fetchFavorites();
+  }, [user?.favorites]);
+
+  return (
+    <div>
+      {!user ? (
+        <div className="flex flex-col justify-center  items-center h-[50vh]">
+          <FaHeart className="text-2xl bg-transparent text-blue-300" size={100} />
+          <p className="text-2xl text-center text-blue-600 block font-bold">You Should <Link href="/login" className="text-blue-400 font-bold hover:text-blue-800">Login</Link> to see your favorite movies</p>
+        </div>
+      ) : (
+        <section className="w-[90%] mt-[5%] mx-auto">
+          <p className="text-6xl mt-5 sm:mt-0 text-center text-blue-600 font-bold">Your Favorites </p>
+          <div className="flex flex-wrap gap-20">
+            {movies.map((movie, index) => (
+              <div key={movie.id}>
+                <Card {...movie} />
+              </div>
+            ))}
           </div>
-    </main>
+        </section>
+      )}
     </div>
-    )
+  );
 }
