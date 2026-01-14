@@ -43,7 +43,6 @@ export const APIRequests = {
       headers: {
         accept: 'application/json',
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_API_ACCESS_TOKEN}`
-
       },
     })
     const trailer = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_TMDB_BASE_URL}/movie/${id}/videos`, {
@@ -77,6 +76,7 @@ export const APIRequests = {
         Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
 
       },
+
     })
   },
   getFavorites: async (userId) => {

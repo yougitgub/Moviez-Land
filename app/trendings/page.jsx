@@ -3,7 +3,7 @@ import { APIRequests } from "@/store/api"
 import Pagination from "@/componnets/Pagination";
 
 export default async function Trendings({ searchParams }) {
-    const page = await searchParams.page;
+    const { page } = await searchParams;
     const trendings = await APIRequests.trending(page)
 
     return (
