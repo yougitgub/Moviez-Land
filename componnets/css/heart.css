@@ -1,0 +1,39 @@
+.heart-btn {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.heart-btn:hover {
+    transform: scale(1.15);
+}
+
+.heart-btn:active {
+    transform: scale(0.9);
+}
+
+/* Pulsing effect for active favorites */
+.heart-btn.bg-blue-600 {
+    animation: heart_pulse 2s ease-in-out infinite;
+}
+
+@keyframes heart_pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(43, 127, 255, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(43, 127, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(43, 127, 255, 0);
+    }
+}
+
+/* Heart icon internal scale */
+.heart-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.heart-btn:hover svg {
+    transform: rotate(15deg) scale(1.1);
+}

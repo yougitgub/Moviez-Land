@@ -1,0 +1,73 @@
+/* Clean & Minimalist Design */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 1. Subtle lift and border glow */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(43, 127, 255, 0.3);
+}
+
+/* 2. Soft Gradient Overlay */
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 70%);
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.card:hover::before {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* 3. Smooth Image Zoom */
+.card_image {
+    transition: transform 0.5s ease;
+}
+
+.card:hover .card_image {
+    transform: scale(1.08);
+}
+
+/* 4. Details Container */
+.card_details {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 20;
+}
+
+.card:hover .card_details {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 5. Minimal Rating Style */
+.rating_simple {
+    display: flex;
+    items-center: center;
+    gap: 4px;
+    color: #fbbf24;
+    /* yellow-400 */
+    font-weight: 700;
+}
+
+/* 6. Clean Button */
+.btn_minimal {
+    padding: 8px 16px;
+    background: #2b7fff;
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn_minimal:hover {
+    background: #1d4ed8;
+}

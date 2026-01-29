@@ -27,13 +27,22 @@ const fetchWithTimeout = async (url, options = {}, timeout = 15000) => {
 }
 
 export const APIRequests = {
-  movies: async (pageNumber = 1) => {
-    return await fetchWithTimeout(`${process.env.TMDB_BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=${pageNumber}&sort_by=popularity.desc`, {
+  movies: async (pageNumber = 1, filters = {}) => {
+    const { genres, year, rating, sort } = filters;
+    let url = `${process.env.TMDB_BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=${pageNumber}`;
+
+    url += `&sort_by=${sort || 'popularity.desc'}`;
+
+    if (genres && genres.length > 0) {
+      url += `&with_genres=${genres}`;
+    }
+
+
+    return await fetchWithTimeout(url, {
       method: "GET",
       headers: {
         accept: 'application/json',
         Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
       },
     })
   },
@@ -68,15 +77,33 @@ export const APIRequests = {
       },
     })
   },
-  trending: async (pageNumber = 1) => {
-    return await fetchWithTimeout(`${process.env.TMDB_BASE_URL}/trending/movie/day?language=en-US&page=${pageNumber}`, {
+  trending: async (pageNumber = 1, filters = {}) => {
+    const { genres, year, rating, sort } = filters;
+    let url = `${process.env.TMDB_BASE_URL}/trending/movie/day?language=en-US&page=${pageNumber}`;
+
+    if (genres || year || rating || (sort && sort !== 'popularity.desc')) {
+      url = `${process.env.TMDB_BASE_URL}/discover/movie?include_adult=false&language=en-US&page=${pageNumber}`;
+      url += `&sort_by=${sort || 'popularity.desc'}`;
+
+      if (genres && genres.length > 0) {
+        url += `&with_genres=${genres}`;
+      }
+
+      if (year) {
+        url += `&primary_release_year=${year}`;
+      }
+
+      if (rating) {
+        url += `&vote_average.gte=${rating}`;
+      }
+    }
+
+    return await fetchWithTimeout(url, {
       method: "GET",
       headers: {
         accept: 'application/json',
         Authorization: `Bearer ${process.env.TMDB_API_ACCESS_TOKEN}`
-
       },
-
     })
   },
   getFavorites: async (userId) => {
